@@ -1,4 +1,6 @@
-#Carrega funÁıes auxiliares
+###FALTA:
+### - Corrigir o uso do Lx para meio do per√≠odo (atualmente considera o ano fechado)
+#Carrega fun√ß√µes auxiliares
 {
   projetarTFT = function (k1,k2,TFT0,TFT,T) {
     t = seq(0,T,5)
@@ -10,17 +12,17 @@
   }
   
   projetarTEF = function (TEFInicial,TEFPadrao,TFTProjetada,AnoInicial,AnoFinal,AnoProjetado) {
-    #Calcula o acumulado (Fx) das TEF da populaÁ„o analisada
+    #Calcula o acumulado (Fx) das TEF da popula√ß√£o analisada
     TEFInicialAcumulada = cumsum(TEFInicial)[1:6]*5
     
-    #Calcula o acumulado (Fx) das TEF da populaÁ„o escolhida como padr„o
+    #Calcula o acumulado (Fx) das TEF da popula√ß√£o escolhida como padr√£o
     TEFPadraoAcumulada = cumsum(TEFPadrao)[1:6]*5
     
-    #Calcula a TFT da populaÁ„o observada e da populaÁ„o padr„o atrvÈs dos somatÛrios das TEF
+    #Calcula a TFT da popula√ß√£o observada e da popula√ß√£o padr√£o atrv√©s dos somat√≥rios das TEF
     TFTInicial = sum(TEFInicial)*5
     TFTPadrao = sum(TEFPadrao)*5
     
-    #Calcula o Vx, V1 e V2 da populaÁ„o observada e padr„o, usando o mÈtodo de Gompertz
+    #Calcula o Vx, V1 e V2 da popula√ß√£o observada e padr√£o, usando o m√©todo de Gompertz
     VxInicial = log(-log(TEFInicialAcumulada[1:6]/TFTInicial))
     VxPadrao = log(-log(TEFPadraoAcumulada[1:6]/TFTPadrao))
     V1Inicial = sum(VxInicial[1:3])/3
@@ -28,11 +30,11 @@
     V1Padrao = sum(VxPadrao[1:3])/3
     V2Padrao = sum(VxPadrao[4:6])/3
     
-    #Calcula os par‚metros Alfa e Beta para a populaÁ„o observada
+    #Calcula os par√¢metros Alfa e Beta para a popula√ß√£o observada
     BETAi = (V2Inicial-V1Inicial)/(V2Padrao-V1Padrao)
     ALFAi = V1Inicial - BETAi*V1Padrao
     
-    #Assume-se que para populaÁ„o padr„o, Alfa È igual a 0 e Beta È igual a 1
+    #Assume-se que para popula√ß√£o padr√£o, Alfa √© igual a 0 e Beta √© igual a 1
     ALFAs = 0
     BETAs = 1
     
@@ -44,7 +46,7 @@
     #Estima os valores de V
     Vx = ALFAx + BETAx*VxPadrao
     
-    #Calcula projeÁ„o das TEF
+    #Calcula proje√ß√£o das TEF
     TEFProjetadaAcumulada = exp(-exp(Vx))*TFTProjetada
     TEFProjetadaAcumulada[7] = TFTProjetada
     TEFProjetada=TEFProjetadaAcumulada[1]/5
@@ -69,7 +71,7 @@
     #Projeta lx para o ano escolhido
     lxProjetado = 1/(1+exp(2*LogitoProjetado))
     
-    #Acrescenta lx inicial e lx padr„o na matriz
+    #Acrescenta lx inicial e lx padr√£o na matriz
     lxProjetado = cbind(lxInicial,lxProjetado,lxFinal)
     
     #Transforma em um data.frame
@@ -81,15 +83,15 @@
     return(lxProjetado)
   }
   
-  #FunÁ„o de calcular t·bua de vida precisa de ajustes
+  #Fun√ß√£o de calcular t√°bua de vida precisa de ajustes
   calculaTabuaDeVida = function(lx) {
     #Transforma lx em um vetor
     lx = lx[,1]
     
-    #Quantidade de grupos et·rios para a t·bua de vida
+    #Quantidade de grupos et√°rios para a t√°bua de vida
     NGrupos = length(lx)
     
-    #Calcula px e qx (probabilidade de sobrevivÍncia e morte)
+    #Calcula px e qx (probabilidade de sobreviv√™ncia e morte)
     px = 0
     for (i in 1:(NGrupos-1)) {
       px[i] = lx[i+1]/lx[i]
@@ -97,7 +99,7 @@
     px[NGrupos]=0
     qx = 1-px
     
-    #Calcula a taxa de mortalidade (mx). **OBS: FALTA UM TRATAMENTO ESPECIAL PARA O C¡LCULO DO ⁄LTIMO GRUPO ET¡RIO!**
+    #Calcula a taxa de mortalidade (mx). **OBS: FALTA UM TRATAMENTO ESPECIAL PARA O C√ÅLCULO DO √öLTIMO GRUPO ET√ÅRIO!**
     mx = -log(1-qx)
     mx[NGrupos] = mx[NGrupos-1]
     
@@ -105,7 +107,7 @@
     dx = rev(diff(rev(lx)))
     dx[NGrupos] = lx[NGrupos]
     
-    #Cria vetor com valores de n e estima ax. **OBS: FALTA UM TRATAMENTO ESPECIAL PARA O C¡LCULO DO ax[1]**
+    #Cria vetor com valores de n e estima ax. **OBS: FALTA UM TRATAMENTO ESPECIAL PARA O C√ÅLCULO DO ax[1]**
     n = rep(5,NGrupos)
     n[NGrupos] = Inf
     ax = rep(2.5,NGrupos)
@@ -124,10 +126,10 @@
       Tx[i] = Tx[i+1]+Lx[i]
     }
     
-    #Calcula esperanÁa de vida
+    #Calcula esperan√ßa de vida
     ex = Tx/lx
     
-    #Cria data.frame com todas as informaÁıes
+    #Cria data.frame com todas as informa√ß√µes
     x = seq(0,(NGrupos*5)-1,5)
     TabuaDeVida = data.frame(x,n,qx,lx,ax,dx,Lx,Tx,ex)
     
@@ -138,10 +140,10 @@
     #Quantidade de Grupos Etarios
     NGrupos = length(Lx)
     
-    #Calcula raz„o de sobrevivÍncia (Sx)
+    #Calcula raz√£o de sobreviv√™ncia (Sx)
     Sx = rep(0,(NGrupos-1))
     Sx[1:(NGrupos-1)] = Lx[2:NGrupos]/Lx[1:(NGrupos-1)]
-    #Cria matriz de sobrevivÍncia
+    #Cria matriz de sobreviv√™ncia
     MatrizSobrevivencia = matrix(0,nrow=NGrupos,ncol=NGrupos)
     diag(MatrizSobrevivencia[2:NGrupos,]) = Sx
     MatrizSobrevivencia[1,4:10] = TEFProjetada*5
@@ -149,20 +151,20 @@
     #  m1 <<- MatrizSobrevivencia
     #  b1 <<- TRUE
     #}
-    #Projeta a populaÁ„o 5 anos adiante, multiplicando a matriz sobreviÍncia pelo vetor de n˙mero de pessoas
+    #Projeta a popula√ß√£o 5 anos adiante, multiplicando a matriz sobrevi√™ncia pelo vetor de n√∫mero de pessoas
     PopulacaoProjetada = round(MatrizSobrevivencia%*%as.matrix(PopulacaoInicial))
     
     return(PopulacaoProjetada)
   }
   
-  #FunÁ„o Principal
+  #Fun√ß√£o Principal
   projetaPopulacao = function (k1,k2,TFTInicial,TFTFinal,TEFInicial,TEFPadrao,AnoInicial,AnoFinal,
                                lxInicialMasc,lxFinalMasc,lxInicialFem,lxFinalFem,PopulacaoInicialMasc,
                                PopulacaoInicialFem,RazaoDeSexo) {
     
     TempoProjetado = AnoFinal - AnoInicial
     
-    #Projeta nÌvel da fecundidade
+    #Projeta n√≠vel da fecundidade
     TFTProjetada = projetarTFT(k1,k2,TFTInicial,TFTFinal,TempoProjetado)
     
     #Projeta estrutura da fecundidade
@@ -183,7 +185,7 @@
     lxMasc = projetaMortalidade(AnoInicial,AnoFinal,(lxInicialMasc),(lxFinalMasc))
     lxFem = projetaMortalidade(AnoInicial,AnoFinal,(lxInicialFem),(lxFinalFem))
     
-    #Cria t·bua de vida para cada lx e obtÈm separadamente cada Lx
+    #Cria t√°bua de vida para cada lx e obt√©m separadamente cada Lx
     TabuaDeVidaMasc = TabuaDeVidaFem = list()
     LxMasc = LxFem = matrix(NA,nrow=nrow(lxMasc),ncol=0)
     for (i in 1:length(lxMasc)) {
@@ -198,7 +200,7 @@
     GruposEtarios = seq(0,(nrow(LxMasc)-1)*5,5)
     row.names(LxMasc) =row.names(LxFem) = as.character(paste(GruposEtarios,'a',GruposEtarios+4))
     
-    #Projeta populaÁ„o
+    #Projeta popula√ß√£o
     PopulacaoProjetadaMasc = PopulacaoProjetadaFem = matrix(NA,nrow=nrow(LxMasc),ncol=0)
     PopulacaoProjetadaMasc = cbind(PopulacaoProjetadaMasc,PopulacaoInicialMasc)
     PopulacaoProjetadaFem = cbind(PopulacaoProjetadaFem,PopulacaoInicialFem)
@@ -215,7 +217,7 @@
       PopulacaoProjetadaFem[1,i+1] = NascimentosFem
     }
     
-    #Transforma a matriz de populaÁıes projetadas em um data.frame
+    #Transforma a matriz de popula√ß√µes projetadas em um data.frame
     PopulacaoProjetadaMasc = as.data.frame(PopulacaoProjetadaMasc)
     PopulacaoProjetadaFem = as.data.frame(PopulacaoProjetadaFem)
     names(PopulacaoProjetadaMasc) = names(PopulacaoProjetadaFem) = as.character(seq(AnoInicial,AnoFinal,5))
@@ -228,7 +230,7 @@
   }
 }
 
-#Carrega base de dados j· inseridos via dput (RECOMENDADO. Neste caso, n„o utilize o cÛdigo de leitura de arquivos posterior)
+#Carrega base de dados j√° inseridos via dput (RECOMENDADO. Neste caso, n√£o utilize o c√≥digo de leitura de arquivos posterior)
 {  
   TEFSP2010 = c(0.0538, 0.085, 0.0836, 0.069, 0.0384, 0.01, 6e-04)
   TEFCanada2000 = c(0.016962, 0.058912, 0.098526, 0.086446, 0.034296, 0.00579, 0.00023)
@@ -271,9 +273,9 @@
                             0.334739979627375, 0.170479724224426), .Dim = c(18L, 1L))
 }
 
-#Carregar base de dados pela leitura de arquivos (SÛ utilize esse cÛdigo abaixo caso queira carregar dados diferentes do utilizado no trabalho)
+#Carregar base de dados pela leitura de arquivos (S√≥ utilize esse c√≥digo abaixo caso queira carregar dados diferentes do utilizado no trabalho)
 {
-  #FunÁ„o auxiliar para rearranjar dados
+  #Fun√ß√£o auxiliar para rearranjar dados
   convertePxParalx = function (px) {
     Npx = length(px)
     px = c(px[1:18],px[Npx])
@@ -305,19 +307,19 @@
   lxBrasil2060Fem = convertePxParalx(read.table("C:/Users/PC/OneDrive/UFRN/2016.2/Projecoes Populacionais/Trabalho Projecao Populacao no R/pxBrasil2060Fem.txt")[,1])
 }
 
-#Salva resultado da projeÁ„o, em uma lista, onde o primeiro elemento È TFT Projetada,
-#o segundo a TEF projetada, o terceiro È uma lista com todas as t·buas de vida masculina projetadas,
-#o quarto È uma lista com todas as t·buas de vida femininas projetadas, o quinto È
-#a populaÁ„o masculina projetada, e o sexto È a populaÁ„o feminina projetada.
+#Salva resultado da proje√ß√£o, em uma lista, onde o primeiro elemento √© TFT Projetada,
+#o segundo a TEF projetada, o terceiro √© uma lista com todas as t√°buas de vida masculina projetadas,
+#o quarto √© uma lista com todas as t√°buas de vida femininas projetadas, o quinto √©
+#a popula√ß√£o masculina projetada, e o sexto √© a popula√ß√£o feminina projetada.
 #Nas entradas, os dados TEFInicial e TEFPadrao devem estar no formato de um vetor simples,
-#k1, k2, TFTInicial, TFTFinal, AnoInicial, AnoFinal e RazaoDeSexo s„o valores ˙nicos e simples,
+#k1, k2, TFTInicial, TFTFinal, AnoInicial, AnoFinal e RazaoDeSexo s√£o valores √∫nicos e simples,
 #os demais argumentos devem ser passaados em formato de matriz coluna.
 ResultadosProjecoes = projetaPopulacao(k1=1.3, k2=3.39, TFTInicial=1.66, TFTFinal=1.476, TEFInicial=TEFSP2010, TEFPadrao=TEFCanada2000,
                  AnoInicial=2010, AnoFinal=2030, lxInicialMasc=lxSP2010Masc, lxFinalMasc=lxCanada2000Masc,
                  lxInicialFem=lxSP2010Fem,  lxFinalFem=lxCanada2000Fem, PopulacaoInicialMasc=PopSP2010Masc,
                  PopulacaoInicialFem=PopSP2010Fem, RazaoDeSexo=0.9478)
 
-#ProjeÁ„o apenas da mortalidade (lx) de S„o Paulo em 2000 para 2030, utilizando como padr„o
+#Proje√ß√£o apenas da mortalidade (lx) de S√£o Paulo em 2000 para 2030, utilizando como padr√£o
 #a mortalidade do Brasil projetada para 2060 segundo dados do IBGE
 {
   lxProjetadoSPMasc = projetaMortalidade(AnoInicial = 2000,AnoFinal = 2030,lxInicial = lxSP2000Masc,lxFinal = lxBrasil2060Masc)
@@ -326,10 +328,10 @@ ResultadosProjecoes = projetaPopulacao(k1=1.3, k2=3.39, TFTInicial=1.66, TFTFina
   calculaTabuaDeVida(lxProjetadoSPMasc[6])
 }
 
-#Plota gr·ficos das projeÁıes da estrutura de fecundidade
+#Plota gr√°ficos das proje√ß√µes da estrutura de fecundidade
 {
-  png(filename = "Projecao Fecundidade em S„o Paulo.png")
-  plot(ResultadosProjecoes$TEFProjetada$`2030`,xaxt='n',type='n',main="ProjeÁ„o da estrutura da fecundidade \n para o estado de S„o Paulo",xlab="Idade",ylab="Taxa EspecÌfica de Fecundidade")
+  png(filename = "Projecao Fecundidade em S√£o Paulo.png")
+  plot(ResultadosProjecoes$TEFProjetada$`2030`,xaxt='n',type='n',main="Proje√ß√£o da estrutura da fecundidade \n para o estado de S√£o Paulo",xlab="Idade",ylab="Taxa Espec√≠fica de Fecundidade")
   lines(TEFSP2010,type='l',col='blue',lwd=2)
   lines(ResultadosProjecoes$TEFProjetada$`2015`,type='l',col='red',lwd=2)
   lines(ResultadosProjecoes$TEFProjetada$`2020`,type='l',col='green',lwd=2)
@@ -344,17 +346,17 @@ ResultadosProjecoes = projetaPopulacao(k1=1.3, k2=3.39, TFTInicial=1.66, TFTFina
 
 attach(ResultadosProjecoes)
 
-#Gera pir‚mides et·rias
+#Gera pir√¢mides et√°rias
 {
   library(plotrix)
   mcol<-color.gradient(c(0,0,0.5,1),c(0,0,0.5,1),c(1,1,0.5,1),18)
   fcol<-color.gradient(c(1,1,0.5,1),c(0.5,0.5,0.5,1),c(0.5,0.5,0.5,1),18)
   
   for (i in 1:length(PopulacaoProjetadaMasc)) {
-    png(filename=paste("Pir‚mide Et·ria de SP em",names(PopulacaoProjetadaMasc)[i],".png"))
+    png(filename=paste("Pir√¢mide Et√°ria de SP em",names(PopulacaoProjetadaMasc)[i],".png"))
     PopulacaoTotal = sum(c(PopulacaoProjetadaMasc[,i],PopulacaoProjetadaFem[,i]))/100
     par(mar=pyramid.plot(PopulacaoProjetadaMasc[,i]/PopulacaoTotal,PopulacaoProjetadaFem[,i]/PopulacaoTotal,
-                         main=paste("Pir‚mide Et·ria do Estado de S„o Paulo em",names(PopulacaoProjetadaFem)[i]),
+                         main=paste("Pir√¢mide Et√°ria do Estado de S√£o Paulo em",names(PopulacaoProjetadaFem)[i]),
                          top.labels = c('Homens','Idade','Mulheres'),labels=row.names(PopulacaoProjetadaMasc),
                          lxcol=mcol,rxcol=fcol,gap=1,show.values=TRUE))
     dev.off()
